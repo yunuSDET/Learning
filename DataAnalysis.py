@@ -4,6 +4,7 @@ import numpy as np
 from sklearn.linear_model import LinearRegression
 from sklearn.preprocessing import PolynomialFeatures
 from sklearn.pipeline import make_pipeline
+from sklearn.preprocessing import MinMaxScaler
 
 def get_second_column(file_path):
     workbook = openpyxl.load_workbook(file_path)
@@ -14,9 +15,9 @@ def get_second_column(file_path):
 
 data_files = [file for file in os.listdir() if file.startswith("Data") and file.endswith(".xlsx")]
 
-all_models = []  # Her veri seti için bir modeli saklamak için liste
+# Tüm veri setleri için bir regresyon modeli oluştur
+all_models = []
 
-# Her bir veri seti için ayrı bir regresyon modeli oluştur
 for data_file in data_files:
     second_column_values = get_second_column(data_file)
     X = np.array(second_column_values[:-1]).reshape(-1, 1)
@@ -28,30 +29,34 @@ for data_file in data_files:
 
     all_models.append(model)
 
-# Tahmin edilecek seti oluştur (örneğin, en son veri seti)
+# Son veri setinin eğilimini taklit ederek devam et
+last_model = all_models[-1]
 tahmin_edilecek_set = np.array(get_second_column(data_files[-1])).reshape(-1, 1)
 
-# Tahmin edilen seti diğer veri setlerine uygun boyuta getir
-for i in range(len(data_files) - 1):
-    current_model = all_models[i]
-    current_set_length = len(get_second_column(data_files[i])) - 1
-    predicted_set_length = len(tahmin_edilecek_set)
+# Min-max normalizasyon uygula
+scaler = MinMaxScaler()
+tahmin_edilecek_set_normalized = scaler.fit_transform(tahmin_edilecek_set)
 
-    while predicted_set_length < current_set_length:
-        # Tahminlerde bulun
-        tahmin = current_model.predict(tahmin_edilecek_set[-1].reshape(-1, 1))
-        tahmin_edilecek_set = np.concatenate([tahmin_edilecek_set, tahmin], axis=0)
-        predicted_set_length += 1
+# Yeni veri noktaları ekleyerek seti genişlet
+for i in range(len(tahmin_edilecek_set), len(tahmin_edilecek_set) + 35000):
+    # Eğilim tahmini yap
+    eğilim_tahmini_normalized = last_model.predict(tahmin_edilecek_set_normalized[-1].reshape(-1, 1))
 
-# Tahmin edilen seti son veri setine ekle
-son_veri_seti = tahmin_edilecek_set
+    # Artışları daha detaylı taklit et
+    artis_orani = np.random.normal(loc=1, scale=0.1)  # Rastgele bir artış oranı seç
+    eğilim_tahmini_normalized *= artis_orani
 
-print("Son Veri Seti: İlk 10")
-for i in son_veri_seti[:10]:
+    # Tahmini normalize edilmiş değerleri gerçek değerlere çevir
+    eğilim_tahmini = scaler.inverse_transform(eğilim_tahmini_normalized.reshape(-1, 1))
+
+    tahmin_edilecek_set = np.concatenate([tahmin_edilecek_set, eğilim_tahmini], axis=0)
+
+print("Tahmin Edilen Veri Seti: İlk 10")
+for i in tahmin_edilecek_set[:10]:
     print(i)
 
-print("Son Veri Seti: Son 10")
-for i in son_veri_seti[-10:]:
+print("Tahmin Edilen Veri Seti: Son 10")
+for i in tahmin_edilecek_set[-10:]:
     print(i)
 
-print(len(son_veri_seti))
+print(len(tahmin_edilecek_set))

@@ -1,0 +1,19 @@
+#100 000 şekil değiştirme hız değişimi gittikçe arttacak (3 ay)
+#0-80000 1.1-1.4(inişli çıkışlı)
+# 80000 1.4
+# 90000 1.5
+# 100000 1.5> aniden bozulma olabiliyor
+
+
+#lineer regression
+
+
+#Farklı kalıplar farklı yerlede bitiyor
+# 1-2-3-4-5 veri seti (20 set de olabilir)
+
+
+#Algoritma 5 seti okuyacak
+#6. kalıba 20 bin veri gireceğiz ömrünü hesaplayacak (artık data güncellendi)
+#7. kalıp 20 binden sonrasını takip edecek (artık data güncellendi)
+
+##Vuruş anında hız anlık düşüyor örneğin 35 ten 34 e düşüyor

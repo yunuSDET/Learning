@@ -2,7 +2,8 @@ import openpyxl
 import os
 import numpy as np
 from sklearn.linear_model import LinearRegression
-
+from sklearn.preprocessing import PolynomialFeatures
+from sklearn.pipeline import make_pipeline
 
 def get_second_column(file_path):
     workbook = openpyxl.load_workbook(file_path)
@@ -13,64 +14,44 @@ def get_second_column(file_path):
 
 data_files = [file for file in os.listdir() if file.startswith("Data") and file.endswith(".xlsx")]
 
-all_second_columns = []
+all_models = []  # Her veri seti için bir modeli saklamak için liste
 
-
-
-# Her dosyayı aç, ikinci sütunu al ve listeye ekle
+# Her bir veri seti için ayrı bir regresyon modeli oluştur
 for data_file in data_files:
     second_column_values = get_second_column(data_file)
-    all_second_columns.append(second_column_values)
+    X = np.array(second_column_values[:-1]).reshape(-1, 1)
+    Y = np.array(second_column_values[1:]).reshape(-1, 1)
 
+    # Polynomial regresyon kullanarak modeli oluştur
+    model = make_pipeline(PolynomialFeatures(degree=3), LinearRegression())
+    model.fit(X, Y)
 
+    all_models.append(model)
 
-# Tüm ikinci sütun değerlerini içerecek liste
-X = np.concatenate(all_second_columns)
+# Tahmin edilecek seti oluştur (örneğin, en son veri seti)
+tahmin_edilecek_set = np.array(get_second_column(data_files[-1])).reshape(-1, 1)
 
+# Tahmin edilen seti diğer veri setlerine uygun boyuta getir
+for i in range(len(data_files) - 1):
+    current_model = all_models[i]
+    current_set_length = len(get_second_column(data_files[i])) - 1
+    predicted_set_length = len(tahmin_edilecek_set)
 
-
-# Her bir satırın ilk elemanını bağımlı değişken Y olarak al
-Y_original = X[:-1]  # Son eleman hariç
-Y_to_predict = X[1:]  # İlk eleman hariç, tahmin edilecek setin gerçek değeri
-
-
-
-# Bağımlı değişkeni (Y_original) ve bağımsız değişkeni (X) kullanarak modeli oluştur
-model = LinearRegression()
-
-
-
-# Eğitici verilerle modeli eğit
-model.fit(Y_original.reshape(-1, 1), Y_to_predict.reshape(-1, 1))
-
-
-
-# Tahmin edilecek seti oluştur
-tahmin_edilecek_set = Y_to_predict.reshape(1, -1)
-
-
-
-# Tahminleri gerçekleştir
-tahminler = []
-step = 100  # Her adımda bir güncelleme yap
-for i in range(0, len(tahmin_edilecek_set[0]), step):
-    tahmin = model.predict(tahmin_edilecek_set[0][:i+1].reshape(-1, 1))
-    tahminler.append(tahmin[-1])
-
-
+    while predicted_set_length < current_set_length:
+        # Tahminlerde bulun
+        tahmin = current_model.predict(tahmin_edilecek_set[-1].reshape(-1, 1))
+        tahmin_edilecek_set = np.concatenate([tahmin_edilecek_set, tahmin], axis=0)
+        predicted_set_length += 1
 
 # Tahmin edilen seti son veri setine ekle
-son_veri_seti = np.concatenate([Y_to_predict[:len(tahminler)].reshape(-1, 1), np.array(tahminler).reshape(-1, 1)], axis=0)
+son_veri_seti = tahmin_edilecek_set
 
-print("Son Veri Seti:")
-for i in son_veri_seti:
+print("Son Veri Seti: İlk 10")
+for i in son_veri_seti[:10]:
     print(i)
 
+print("Son Veri Seti: Son 10")
+for i in son_veri_seti[-10:]:
+    print(i)
 
 print(len(son_veri_seti))
-
-print("Model Coef:", model.coef_)
-print("Model Intercept:", model.intercept_)
-
-
-

@@ -5,6 +5,9 @@ from sklearn.linear_model import LinearRegression
 from sklearn.preprocessing import PolynomialFeatures, MinMaxScaler
 from sklearn.pipeline import make_pipeline
 
+import Main
+
+
 def get_second_column(file_path):
     workbook = openpyxl.load_workbook(file_path)
     sheet = workbook['Data']
@@ -55,4 +58,12 @@ print(tahmin_edilecek_set[:10])
 print("Tahmin Edilen Veri Seti: Son 10")
 print(tahmin_edilecek_set[-10:])
 
-print(len(tahmin_edilecek_set))
+print("Estimated data size is: "+str(len(tahmin_edilecek_set)))
+
+question =input("Do you want to add estimated data into the data set? (y/n)")
+if question == "y" or question == "Y":
+    sayi_listesi = [eleman[0] for eleman in tahmin_edilecek_set]
+    Main.updateLastFileWithEstimatedData(sayi_listesi)
+    print("Analysis is completed and new data is saved")
+else:
+    print("Analysis is completed but new data is not saved")

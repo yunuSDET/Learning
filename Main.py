@@ -69,8 +69,28 @@ def getTime(time):
 
     return baslangic_tarihi
 
+def get_latest_data_file():
+    data_files = [file for file in os.listdir() if file.startswith("Data") and file.endswith(".xlsx")]
 
-def generateAndSaveData(entire=True):
+    if not data_files:
+        return None  # Eğer uygun dosya bulunamazsa None döndür
+
+    latest_file = max(data_files, key=os.path.getctime)
+    return latest_file
+
+def generateAndSaveData(entire=True,isEstimated=False,dataList=[]):
+
+    if isEstimated:
+        print("Buraya girdik")
+        fileName=get_latest_data_file()
+        workbook = openpyxl.load_workbook(fileName)
+        yeni_sayfa = workbook.active
+        addEstimatedData(yeni_sayfa, dataList)
+        workbook.save(fileName)
+        return
+
+    print("Buraya girmedik")
+
     fileName = "Data1.xlsx"
 
     fileName = olustur_ve_aktif_et(fileName)
@@ -107,10 +127,16 @@ def generateAndSaveData(entire=True):
     workbook.save(fileName)
 
 
+def addEstimatedData(pageName, dataList):
+    for row in range(2, len(dataList)):
+        pageName.cell(row=row, column=2, value=dataList[row-2])
 
 
+def updateLastFileWithEstimatedData(dataList):
+    generateAndSaveData(True, True, dataList)
 
 
-for i in range(1):
-    generateAndSaveData(True)
-    baslangic_tarihi = datetime(2023, randint(1, 3), randint(1, 28), randint(1, 22))
+def addNewData():
+    for i in range(1):
+        generateAndSaveData(True)
+        baslangic_tarihi = datetime(2023, randint(1, 3), randint(1, 28), randint(1, 22))

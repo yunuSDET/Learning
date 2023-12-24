@@ -2,9 +2,8 @@ import openpyxl
 import os
 import numpy as np
 from sklearn.linear_model import LinearRegression
-from sklearn.preprocessing import PolynomialFeatures
+from sklearn.preprocessing import PolynomialFeatures, MinMaxScaler
 from sklearn.pipeline import make_pipeline
-from sklearn.preprocessing import MinMaxScaler
 
 def get_second_column(file_path):
     workbook = openpyxl.load_workbook(file_path)
@@ -24,9 +23,8 @@ for data_file in data_files:
     Y = np.array(second_column_values[1:]).reshape(-1, 1)
 
     # Polynomial regresyon kullanarak modeli oluştur
-    model = make_pipeline(PolynomialFeatures(degree=3), LinearRegression())
+    model = make_pipeline(PolynomialFeatures(degree=2), LinearRegression())
     model.fit(X, Y)
-
     all_models.append(model)
 
 # Son veri setinin eğilimini taklit ederek devam et
@@ -43,7 +41,7 @@ for i in range(len(tahmin_edilecek_set), len(tahmin_edilecek_set) + 35000):
     eğilim_tahmini_normalized = last_model.predict(tahmin_edilecek_set_normalized[-1].reshape(-1, 1))
 
     # Artışları daha detaylı taklit et
-    artis_orani = np.random.normal(loc=1, scale=0.1)  # Rastgele bir artış oranı seç
+    artis_orani = np.random.normal(loc=1, scale=0.05)  # Rastgele bir artış oranı seç
     eğilim_tahmini_normalized *= artis_orani
 
     # Tahmini normalize edilmiş değerleri gerçek değerlere çevir
@@ -52,11 +50,9 @@ for i in range(len(tahmin_edilecek_set), len(tahmin_edilecek_set) + 35000):
     tahmin_edilecek_set = np.concatenate([tahmin_edilecek_set, eğilim_tahmini], axis=0)
 
 print("Tahmin Edilen Veri Seti: İlk 10")
-for i in tahmin_edilecek_set[:10]:
-    print(i)
+print(tahmin_edilecek_set[:10])
 
 print("Tahmin Edilen Veri Seti: Son 10")
-for i in tahmin_edilecek_set[-10:]:
-    print(i)
+print(tahmin_edilecek_set[-10:])
 
 print(len(tahmin_edilecek_set))

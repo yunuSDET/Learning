@@ -81,7 +81,7 @@ def get_latest_data_file():
 def generateAndSaveData(entire=True,isEstimated=False,dataList=[]):
 
     if isEstimated:
-        print("Buraya girdik")
+
         fileName=get_latest_data_file()
         workbook = openpyxl.load_workbook(fileName)
         yeni_sayfa = workbook.active
@@ -89,7 +89,7 @@ def generateAndSaveData(entire=True,isEstimated=False,dataList=[]):
         workbook.save(fileName)
         return
 
-    print("Buraya girmedik")
+
 
     fileName = "Data1.xlsx"
 
@@ -115,13 +115,13 @@ def generateAndSaveData(entire=True,isEstimated=False,dataList=[]):
 
 
     secondStep = firstStep + randint(10000, 18000)
-    addData(yeni_sayfa, firstStep, secondStep, 1.36, 1.43, 900000)
+    addData(yeni_sayfa, firstStep, secondStep, 1.20, 1.49, 900000)
 
     thirdStep = secondStep + randint(6000, 10000)
-    addData(yeni_sayfa, secondStep, thirdStep, 1.41, 1.47, 1000000)
+    addData(yeni_sayfa, secondStep, thirdStep, 1.34, 1.56, 1000000)
 
-    forthStep = thirdStep + randint(3000, 15000)
-    addData(yeni_sayfa, thirdStep, forthStep, 1.46, 1.54, 500000)
+    forthStep = thirdStep + randint(50, 250)
+    addData(yeni_sayfa, thirdStep, forthStep, 1.45, 1.95, 500000)
 
     # Excel dosyasını kaydet
     workbook.save(fileName)
@@ -136,7 +136,7 @@ def updateLastFileWithEstimatedData(dataList):
     generateAndSaveData(True, True, dataList)
 
 
-def addNewData():
-    for i in range(1):
-        generateAndSaveData(True)
+def addNewData(times,entireOrNot):
+    for i in range(times):
+        generateAndSaveData(entireOrNot)
         baslangic_tarihi = datetime(2023, randint(1, 3), randint(1, 28), randint(1, 22))
